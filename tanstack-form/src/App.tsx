@@ -1,35 +1,120 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { createFormHook, createFormHookContexts } from "@tanstack/react-form";
+import { HTMLAttributes } from "react";
+import { z } from "zod";
 
-function App() {
-  const [count, setCount] = useState(0)
+const { fieldContext, useFieldContext, formContext } = createFormHookContexts();
+
+const TextField = ({ label }: { label: string }) => {
+  const field = useFieldContext<string>();
+  const isError = field.state.meta.errors.length;
+  return (
+    <>
+      <label htmlFor="text-field">{label}</label>
+      <input
+        style={{ border: isError ? "1px solid red" : "" }}
+        value={field.state.value}
+        onChange={(e) => field.setValue(e.target.value)}
+        id="text-field"
+        type="text"
+      />
+      {!isError && (
+        <small style={{ opacity: 0, pointerEvents: "none" }}>placeholder</small>
+      )}
+      {isError ? (
+        <small style={{ color: "red" }}>
+          {field.state.meta.errors.map((e) => e.message).join(",")}
+        </small>
+      ) : null}
+    </>
+  );
+};
+
+const NumberField = ({ label }: { label: string }) => {
+  const field = useFieldContext<number>();
+  const isError = field.state.meta.errors.length;
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <label htmlFor="number-field">{label}</label>
+      <input
+        style={{ border: isError ? "1px solid red" : "" }}
+        onChange={(e) => field.setValue(parseInt(e.target.value))}
+        value={field.state.value}
+        id="number-field"
+        type="number"
+      />
+      {!isError && (
+        <small style={{ opacity: 0, pointerEvents: "none" }}>placeholder</small>
+      )}
+      {isError ? (
+        <small style={{ color: "red" }}>
+          {field.state.meta.errors.map((e) => e.message).join(",")}
+        </small>
+      ) : null}
     </>
-  )
+  );
+};
+
+const SubmitButton = (props: HTMLAttributes<HTMLButtonElement>) => {
+  return <button {...props}></button>;
+};
+
+function App() {
+  const { useAppForm } = createFormHook({
+    fieldComponents: { TextField, NumberField },
+    formComponents: { SubmitButton },
+    fieldContext,
+    formContext,
+  });
+  const form = useAppForm({
+    defaultValues: {
+      username: "",
+      age: 0,
+    },
+    validators: {
+      onChange: z.object({
+        username: z.string().min(1, { message: "Please enter a username" }),
+        age: z.number().min(13, { message: "Min age is 13" }),
+      }),
+    },
+    onSubmit: ({ value }) => {
+      alert(JSON.stringify(value, null, 2));
+    },
+  });
+  return (
+    <main
+      style={{
+        width: "100%",
+        height: "100%",
+        minHeight: "100dvh",
+        display: "grid",
+        placeContent: "center",
+      }}
+    >
+      <article style={{ padding: 64, width: 550 }}>
+        <h1 style={{ textAlign: "center" }}>Tanstack form</h1>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
+          <h4 style={{ textAlign: "center" }}>Personal Information</h4>
+          <form.AppField
+            name="username"
+            children={(field) => <field.TextField label="Full Name" />}
+          />
+          <form.AppField
+            name="age"
+            children={(field) => <field.NumberField label="Age" />}
+          />
+          <form.AppForm>
+            <form.SubmitButton>Submit</form.SubmitButton>
+          </form.AppForm>
+        </form>
+      </article>
+    </main>
+  );
 }
 
-export default App
+export default App;
