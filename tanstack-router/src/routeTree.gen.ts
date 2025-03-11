@@ -12,7 +12,13 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as AboutImport } from './routes/about'
+import { Route as PostsRouteImport } from './routes/posts/route'
 import { Route as IndexImport } from './routes/index'
+import { Route as ArticlesArticleIdImport } from './routes/articles/$articleId'
+import { Route as ArticlesSplatImport } from './routes/articles/$'
+import { Route as PostsPostIdRouteImport } from './routes/posts/$postId/route'
+import { Route as ArticlesFirstIndexImport } from './routes/articles/first/index'
+import { Route as PostsPostIdRevisionIdImport } from './routes/posts/$postId/$revisionId'
 
 // Create/Update Routes
 
@@ -22,10 +28,46 @@ const AboutRoute = AboutImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const PostsRouteRoute = PostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const ArticlesArticleIdRoute = ArticlesArticleIdImport.update({
+  id: '/articles/$articleId',
+  path: '/articles/$articleId',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ArticlesSplatRoute = ArticlesSplatImport.update({
+  id: '/articles/$',
+  path: '/articles/$',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PostsPostIdRouteRoute = PostsPostIdRouteImport.update({
+  id: '/$postId',
+  path: '/$postId',
+  getParentRoute: () => PostsRouteRoute,
+} as any)
+
+const ArticlesFirstIndexRoute = ArticlesFirstIndexImport.update({
+  id: '/articles/first/',
+  path: '/articles/first/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const PostsPostIdRevisionIdRoute = PostsPostIdRevisionIdImport.update({
+  id: '/$revisionId',
+  path: '/$revisionId',
+  getParentRoute: () => PostsPostIdRouteRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -39,6 +81,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/posts': {
+      id: '/posts'
+      path: '/posts'
+      fullPath: '/posts'
+      preLoaderRoute: typeof PostsRouteImport
+      parentRoute: typeof rootRoute
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -46,44 +95,153 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
+    '/posts/$postId': {
+      id: '/posts/$postId'
+      path: '/$postId'
+      fullPath: '/posts/$postId'
+      preLoaderRoute: typeof PostsPostIdRouteImport
+      parentRoute: typeof PostsRouteImport
+    }
+    '/articles/$': {
+      id: '/articles/$'
+      path: '/articles/$'
+      fullPath: '/articles/$'
+      preLoaderRoute: typeof ArticlesSplatImport
+      parentRoute: typeof rootRoute
+    }
+    '/articles/$articleId': {
+      id: '/articles/$articleId'
+      path: '/articles/$articleId'
+      fullPath: '/articles/$articleId'
+      preLoaderRoute: typeof ArticlesArticleIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/posts/$postId/$revisionId': {
+      id: '/posts/$postId/$revisionId'
+      path: '/$revisionId'
+      fullPath: '/posts/$postId/$revisionId'
+      preLoaderRoute: typeof PostsPostIdRevisionIdImport
+      parentRoute: typeof PostsPostIdRouteImport
+    }
+    '/articles/first/': {
+      id: '/articles/first/'
+      path: '/articles/first'
+      fullPath: '/articles/first'
+      preLoaderRoute: typeof ArticlesFirstIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
 // Create and export the route tree
 
+interface PostsPostIdRouteRouteChildren {
+  PostsPostIdRevisionIdRoute: typeof PostsPostIdRevisionIdRoute
+}
+
+const PostsPostIdRouteRouteChildren: PostsPostIdRouteRouteChildren = {
+  PostsPostIdRevisionIdRoute: PostsPostIdRevisionIdRoute,
+}
+
+const PostsPostIdRouteRouteWithChildren =
+  PostsPostIdRouteRoute._addFileChildren(PostsPostIdRouteRouteChildren)
+
+interface PostsRouteRouteChildren {
+  PostsPostIdRouteRoute: typeof PostsPostIdRouteRouteWithChildren
+}
+
+const PostsRouteRouteChildren: PostsRouteRouteChildren = {
+  PostsPostIdRouteRoute: PostsPostIdRouteRouteWithChildren,
+}
+
+const PostsRouteRouteWithChildren = PostsRouteRoute._addFileChildren(
+  PostsRouteRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/posts': typeof PostsRouteRouteWithChildren
   '/about': typeof AboutRoute
+  '/posts/$postId': typeof PostsPostIdRouteRouteWithChildren
+  '/articles/$': typeof ArticlesSplatRoute
+  '/articles/$articleId': typeof ArticlesArticleIdRoute
+  '/posts/$postId/$revisionId': typeof PostsPostIdRevisionIdRoute
+  '/articles/first': typeof ArticlesFirstIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/posts': typeof PostsRouteRouteWithChildren
   '/about': typeof AboutRoute
+  '/posts/$postId': typeof PostsPostIdRouteRouteWithChildren
+  '/articles/$': typeof ArticlesSplatRoute
+  '/articles/$articleId': typeof ArticlesArticleIdRoute
+  '/posts/$postId/$revisionId': typeof PostsPostIdRevisionIdRoute
+  '/articles/first': typeof ArticlesFirstIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/posts': typeof PostsRouteRouteWithChildren
   '/about': typeof AboutRoute
+  '/posts/$postId': typeof PostsPostIdRouteRouteWithChildren
+  '/articles/$': typeof ArticlesSplatRoute
+  '/articles/$articleId': typeof ArticlesArticleIdRoute
+  '/posts/$postId/$revisionId': typeof PostsPostIdRevisionIdRoute
+  '/articles/first/': typeof ArticlesFirstIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths:
+    | '/'
+    | '/posts'
+    | '/about'
+    | '/posts/$postId'
+    | '/articles/$'
+    | '/articles/$articleId'
+    | '/posts/$postId/$revisionId'
+    | '/articles/first'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to:
+    | '/'
+    | '/posts'
+    | '/about'
+    | '/posts/$postId'
+    | '/articles/$'
+    | '/articles/$articleId'
+    | '/posts/$postId/$revisionId'
+    | '/articles/first'
+  id:
+    | '__root__'
+    | '/'
+    | '/posts'
+    | '/about'
+    | '/posts/$postId'
+    | '/articles/$'
+    | '/articles/$articleId'
+    | '/posts/$postId/$revisionId'
+    | '/articles/first/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PostsRouteRoute: typeof PostsRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
+  ArticlesSplatRoute: typeof ArticlesSplatRoute
+  ArticlesArticleIdRoute: typeof ArticlesArticleIdRoute
+  ArticlesFirstIndexRoute: typeof ArticlesFirstIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PostsRouteRoute: PostsRouteRouteWithChildren,
   AboutRoute: AboutRoute,
+  ArticlesSplatRoute: ArticlesSplatRoute,
+  ArticlesArticleIdRoute: ArticlesArticleIdRoute,
+  ArticlesFirstIndexRoute: ArticlesFirstIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,14 +255,44 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about"
+        "/posts",
+        "/about",
+        "/articles/$",
+        "/articles/$articleId",
+        "/articles/first/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
+    "/posts": {
+      "filePath": "posts/route.tsx",
+      "children": [
+        "/posts/$postId"
+      ]
+    },
     "/about": {
       "filePath": "about.tsx"
+    },
+    "/posts/$postId": {
+      "filePath": "posts/$postId/route.tsx",
+      "parent": "/posts",
+      "children": [
+        "/posts/$postId/$revisionId"
+      ]
+    },
+    "/articles/$": {
+      "filePath": "articles/$.tsx"
+    },
+    "/articles/$articleId": {
+      "filePath": "articles/$articleId.tsx"
+    },
+    "/posts/$postId/$revisionId": {
+      "filePath": "posts/$postId/$revisionId.tsx",
+      "parent": "/posts/$postId"
+    },
+    "/articles/first/": {
+      "filePath": "articles/first/index.tsx"
     }
   }
 }
