@@ -6,9 +6,11 @@ export const Route = createFileRoute("/posts")({
 
 function RouteComponent() {
   return (
-    <>
-      <nav>/posts layout</nav>
-      <Outlet />
-    </>
+    <div>
+      <div className="border-b border-slate-700 pb-4">/posts layout</div>
+      <div className="pt-12">
+        <Outlet />
+      </div>
+    </div>
   );
 }

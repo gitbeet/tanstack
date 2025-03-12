@@ -5,5 +5,9 @@ export const Route = createFileRoute("/articles/$")({
 });
 
 function RouteComponent() {
-  return <div>Hello "/articles/ catch-all route"!</div>;
+  return (
+    <div className="flex justify-center items-center">
+      <h1>Hello "/articles/ catch-all route"!</h1>
+    </div>
+  );
 }

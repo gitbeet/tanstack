@@ -1,18 +1,14 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/posts/$postId")({
-  // In a loader
-  // Or in a component
   component: PostComponent,
 });
 
 function PostComponent() {
-  // In a component!
-  const { postId } = Route.useParams();
   return (
     <div>
-      <nav>posts/$postId layout</nav>
-      <p>Post ID: {postId}</p>
+      <div className="border-b border-slate-700 pb-4">posts/$postId layout</div>
+
       <Outlet />
     </div>
   );

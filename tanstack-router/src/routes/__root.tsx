@@ -3,10 +3,10 @@ import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 
 export const Route = createRootRoute({
   component: () => (
-    <>
-      <nav style={{ padding: 8 }}>
+    <div className="container ">
+      <nav className="flex justify-between border-b border-slate-700 py-4">
         <p>App layout</p>
-        <ul style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <ul className="flex gap-4 items-center">
           <Link to="/">Home</Link>
           <Link to="/about">About</Link>
           <Link to="/posts">Posts</Link>
@@ -14,17 +14,10 @@ export const Route = createRootRoute({
         </ul>
         <div />
       </nav>
-      <hr />
-      <div
-      // style={{
-      //   display: "grid",
-      //   placeContent: "center",
-      //   paddingTop: 32,
-      // }}
-      >
+      <div className="pt-12">
         <Outlet />
       </div>
       <TanStackRouterDevtools />
-    </>
+    </div>
   ),
 });
