@@ -15,6 +15,8 @@ export const Route = createFileRoute("/users/")({
   }),
 });
 
+type Param = (typeof Route)["types"]["searchSchema"];
+
 function RouteComponent() {
   const [city, setCity] = useState("");
   const [name, setName] = useState("");
@@ -24,39 +26,32 @@ function RouteComponent() {
     queryKey: ["users"],
     queryFn: getUsers,
   });
+
   async function getUsers(): Promise<User[]> {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     const usersJson = await fetch("https://jsonplaceholder.typicode.com/users");
     const users = await usersJson.json();
     return users;
   }
-  const handleCityChange = (city: string) => {
-    navigate({
-      search: (old) => ({ ...old, city }),
-    });
-  };
-
-  const handleIdChange = (id: number) => {
-    navigate({
-      search: (old) => ({ ...old, id }),
-    });
-  };
-
-  const handleClearCityParams = () =>
-    navigate({ search: (old) => ({ ...old, city: undefined }) });
-
-  const handleClearIdParams = () =>
-    navigate({ search: (old) => ({ ...old, id: undefined }) });
 
   const handleAddParam = ({
     param,
     value,
   }: {
-    param: "id" | "city" | "name";
-    value: string;
+    param: keyof Param;
+    value: string | number;
   }) => {
+    if (!value) return;
     navigate({
       search: (old) => ({ ...old, [param]: value }),
+    });
+  };
+
+  const handleClearParam = (param: keyof Param) => {
+    if (param === "city") setCity("");
+    if (param === "name") setName("");
+    navigate({
+      search: (old) => ({ ...old, [param]: undefined }),
     });
   };
 
@@ -114,6 +109,9 @@ function RouteComponent() {
                 >
                   Filter by city
                 </button>
+                <button onClick={() => handleClearParam("city")}>
+                  Clear city param
+                </button>
               </div>
               <div className="space-x-4 ">
                 <input
@@ -129,17 +127,30 @@ function RouteComponent() {
                 >
                   Filter by name
                 </button>
+                <button onClick={() => handleClearParam("name")}>
+                  Clear name param
+                </button>
               </div>
               <div className="flex gap-4">
-                <button onClick={handleClearCityParams}>
+                <button onClick={() => handleClearParam("city")}>
                   Clear city params
                 </button>
-                <button onClick={() => handleCityChange("Howemouth")}>
+                <button
+                  onClick={() =>
+                    handleAddParam({ param: "city", value: "Howemouth" })
+                  }
+                >
                   From Howemouth
                 </button>
                 <div className="flex gap-4">
-                  <button onClick={handleClearIdParams}>Clear ID params</button>
-                  <button onClick={() => handleIdChange(1)}>ID = 1</button>
+                  <button onClick={() => handleClearParam("id")}>
+                    Clear ID params
+                  </button>
+                  <button
+                    onClick={() => handleAddParam({ param: "id", value: 1 })}
+                  >
+                    ID = 1
+                  </button>
                 </div>
               </div>
             </div>
