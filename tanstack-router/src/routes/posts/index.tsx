@@ -21,6 +21,7 @@ function RouteComponent() {
   return (
     <div className="flex flex-col gap-12 items-center justify-center">
       <h1>Posts</h1>
+      <h2>Click on a post to navigate to its page</h2>
       {isPending && <LoadingSpinner />}
       {error && <h2>{error.message}</h2>}
       {isSuccess && (

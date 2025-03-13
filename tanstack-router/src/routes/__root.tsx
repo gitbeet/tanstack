@@ -9,6 +9,7 @@ export const Route = createRootRoute({
         <ul className="flex gap-4 items-center">
           <Link to="/">Home</Link>
           <Link to="/about">About</Link>
+          <Link to="/users">Users</Link>
           <Link to="/posts">Posts</Link>
           <Link to="/articles/$">Articles</Link>
         </ul>
