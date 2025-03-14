@@ -2,9 +2,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import "./App.css";
 import { useState } from "react";
+import Spinner from "./components/Spinner";
+
+const DELAY = 500;
 
 function App() {
   const [title, setTitle] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
   const queryClient = useQueryClient();
 
   const { data, isPending } = useQuery({
@@ -18,40 +23,47 @@ function App() {
     return todos;
   }
 
-  const addTodoMutation = useMutation({
+  const { mutate: addTodo, isPending: isAddingTodo } = useMutation({
     mutationFn: async () => {
+      await new Promise((resolve) => setTimeout(resolve, DELAY));
       const todo = { id: Date.now(), title, completed: false };
       await axios.post("http://localhost:3000/todos/create", todo);
     },
-    onSuccess: () => {
+    onSettled: () => {
       setTitle("");
       queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
   });
 
-  const deleteTodoMutation = useMutation({
+  const { mutate: deleteTodo, isPending: isDeletingTodo } = useMutation({
     mutationFn: async (id) => {
+      await new Promise((resolve) => setTimeout(resolve, DELAY));
       await axios.delete("http://localhost:3000/todos/delete", {
         data: { id },
       });
     },
-    onSuccess: () => {
+    onMutate: (id) => setDeletingId(id),
+    onSettled: () => {
+      setDeletingId(null);
       queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
   });
 
-  const toggleTodoCompletedMutation = useMutation({
+  const { mutate: toggleTodoCompleted, isPending: isToggling } = useMutation({
     mutationFn: async (id) => {
+      await new Promise((resolve) => setTimeout(resolve, DELAY));
       await axios.post("http://localhost:3000/todos/toggleCompleted", { id });
     },
-    onSuccess: () => {
+    onMutate: (id) => setTogglingId(id),
+    onSettled: () => {
+      setTogglingId(null);
       queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
   });
 
   function handleAddTodo(e) {
     e.preventDefault();
-    addTodoMutation.mutate();
+    addTodo();
   }
 
   return (
@@ -68,22 +80,31 @@ function App() {
               paddingInline: 32,
               paddingBlock: 16,
               marginBlock: 16,
+              opacity:
+                deletingId === todo.id || togglingId === todo.id ? 0.5 : 1,
+              position: "relative",
             }}
             key={todo.id}
           >
+            {(deletingId === todo.id || togglingId === todo.id) && (
+              <Spinner style={{ left: "50%", transform: "translateX(-50%)" }} />
+            )}
+
             <div>
               <input
-                onChange={() => toggleTodoCompletedMutation.mutate(todo.id)}
+                disabled={isAddingTodo || isDeletingTodo || isToggling}
+                onChange={() => toggleTodoCompleted(todo.id)}
                 checked={todo.completed}
                 type="checkbox"
               />
               <span>{todo.title}</span>
             </div>
             <button
+              disabled={isDeletingTodo}
               className="danger"
-              onClick={() => deleteTodoMutation.mutate(todo.id)}
+              onClick={() => deleteTodo(todo.id)}
             >
-              Delete
+              {deletingId === todo.id ? "Deleting..." : "Delete"}
             </button>
           </div>
         ))}
@@ -92,11 +113,13 @@ function App() {
       <div>
         <form onSubmit={handleAddTodo}>
           <input
-            disabled={isPending}
+            disabled={isPending || isAddingTodo}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <button disabled={isPending || !title.length}>Add todo</button>
+          <button disabled={isPending || !title.length || isAddingTodo}>
+            {isAddingTodo ? "Adding todo..." : "Add todo"}
+          </button>
         </form>
       </div>
     </>
